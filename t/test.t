@@ -33,7 +33,7 @@ our $SUBMITTER_ID='test@email.com';
 use Dotenv;      
 Dotenv->load;
 
-our $HOST_PATH = "http://localhost:$ENV{'API_PORT'}"; #8086;
+our $HOST_PATH = "http://localhost:$ENV{'HOST_PORT'}"; #8086;
 
 GetOptions('dry_run' => \$dry_run,
 	   'verbose' => \$verbose) or die "Usage: prove -v t/$0 [ :: [--verbose] ] \n";

@@ -1,3 +1,4 @@
+import uvicorn
 import datetime
 import inspect
 import os
@@ -5,14 +6,11 @@ import os
 from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException, Query
 from fastapi.logger import logger
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, AnyHttpUrl
 from typing import Type, Optional, List
 from starlette.responses import StreamingResponse
 
 from bson.json_util import dumps, loads
-import docker
-
-from docker.errors import ContainerError
 import traceback
 
 
@@ -23,14 +21,14 @@ from logging.config import dictConfig
 import logging
 from fuse.models.Config import LogConfig
 dictConfig(LogConfig().dict())
-logger = logging.getLogger("fuse-tool-template")
+logger = logging.getLogger("fuse-tool-pca")
 
 app = FastAPI()
 
 origins = [
-    f"http://{os.getenv('HOSTNAME')}:{os.getenv('HOSTPORT')}",
-    f"http://{os.getenv('HOSTNAME')}",
-    "http://localhost:{os.getenv('HOSTPORT')}",
+    f"http://{os.getenv('HOST_NAME')}:{os.getenv('HOST_PORT')}",
+    f"http://{os.getenv('HOST_NAME')}",
+    "http://localhost:{os.getenv('HOST_PORT')}",
     "http://localhost",
     "*",
 ]
@@ -46,6 +44,8 @@ app.add_middleware(
 import pathlib
 
 import json
+import io
+import requests
     
 # API is described in:
 # http://localhost:8083/openapi.json
@@ -56,42 +56,57 @@ import json
 # for example, an array of parameter names can be retrieved with:
 # curl -X 'GET'    'http://localhost:8083/openapi.json' -H 'accept: application/json' 2> /dev/null |python -m json.tool |jq '.paths."/submit".post.parameters[].name' 
 
+@app.get("/result_types", description="Submit an analysis")
+async def results_types():
+    return({"result_types": "result-type-pcaTable"})
+
 from datetime import datetime
+import requests
 @app.post("/submit", description="Submit an analysis")
-async def analyze(submitter_id: str = Query(default=None, description="unique identifier for the submitter (e.g., email)"),
-                  number_of_components: int = Query(default=3, description="Number of principle components to return."),
-                  gene_expression: UploadFile = File(...)):
+async def analyze(submitter_id: str = Query(default=..., description="unique identifier for the submitter (e.g., email)"),
+                  number_of_components: int = Query(default=None, description="Number of principle components to return."),
+                  gene_expression_url: AnyHttpUrl = Query(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both"),
+                  gene_expression: UploadFile = File(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both")):
     '''
     Gene expression data are formatted with gene id's on rows, and samples on columns. Gene expression counts/intensities will not be normalized as part of the analysis. No header row, comma-delimited.
     '''
+    function_name="[analyze]"
     try:
-        restul_type="FUSE:PCA" #can also be "FUSE:CellFIE"
+        # xxx figure out how to assert this in the pydantic validation instead
+        assert (gene_expression_url is None or gene_expression is None) and (gene_expression_url is not None or gene_expression is not None)
         start_time=datetime.now()
-        logger.info(msg=f"[submit] started: " + str(start_time))
+        logger.info(msg=f"[submit] started: {start_time}")
         # do some analysis
-        gene_expression_string = await gene_expression.read()
-        import io
-        gene_expression_stream = io.StringIO(str(gene_expression_string,'utf-8'))
+        if gene_expression is not None:
+            logger.info("{function_name} getting file")
+            gene_expression_string = await gene_expression.read()
+            gene_expression_stream = io.StringIO(str(gene_expression_string,'utf-8'))
+        else:
+            # xxx this is problematic; can't seem to get url off loclahost when this app is running in container on same network.
+            logger.info("{function_name} getting url: {gene_expression_url}")
+            r = requests.get(gene_expression_url)
+            logger.info("{function_name} getting expression_stream")
+            gene_expression_stream = io.StringIO(str(r.content, 'utf-8'))
         import pandas as pd
         import numpy as np
         gene_expression_df = pd.read_csv(gene_expression_stream, sep=",", dtype=np.float64)
-        logger.info(msg=f"[submit] read input file.")
+        logger.info(msg=f"{function_name} read input file.")
         from sklearn.decomposition import PCA
         df_pca = PCA(n_components=number_of_components)
-        logger.info(msg=f"[submit] set up PCA.")
+        logger.info(msg=f"{function_name} set up PCA.")
         df_principalComponents = df_pca.fit_transform(gene_expression_df)
-        logger.info(msg=f"[submit] fit the transform.")
+        logger.info(msg=f"{function_name} fit the transform.")
         pc_cols=[]
         for col in range(0,number_of_components):
-            pc_cols.append('PC'+str(col +1))
+            pc_cols.append(f'PC{col +1}')
         df_results = pd.DataFrame(data = df_principalComponents,
                                       columns = pc_cols)
-        logger.info(msg=f"[submit] added PC column names.")
+        logger.info(msg=f"{function_name} added PC column names.")
         results = df_results.values.tolist()
-        logger.info(msg=f"[submit] transformed to list.")
+        logger.info(msg=f"{function_name} transformed to list.")
         # analysis finished.
         end_time=datetime.now()
-        logger.info(msg=f"[submit] ended: " + str(end_time))
+        logger.info(msg=f"{function_name} ended: {end_time}")
         # xxx come back to this
         #return_object = AnalysisResults()
         return_object={}
@@ -108,11 +123,14 @@ async def analyze(submitter_id: str = Query(default=None, description="unique id
             }
         ]
 
-        logger.info(msg=f"[submit] returning: " + str(return_object))
+        logger.info(msg=f"{function_name} returning: {return_object}")
         #return return_object.dict()
         # xxx
         return return_object
     except Exception as e:
         raise HTTPException(status_code=404,
-                            detail="! Exception {0} occurred while running submit, message=[{1}] \n! traceback=\n{2}\n".format(type(e), e, traceback.format_exc()))
+                            detail=f"{function_name} ! Exception {type(e)} occurred while running submit, message=[{e}] ! traceback={traceback.format_exc()}")
 
+
+if __name__=='__main__':
+        uvicorn.run("main:app", host='0.0.0.0', port=int(os.getenv("HOST_PORT")), reload=True )
