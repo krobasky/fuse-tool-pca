@@ -6,14 +6,20 @@
   "documentationUrl": "https://github.com/RENCI/fuse-tool-pca",
   "environment": "test",
   "id": "fuse-tool-pca",
+  "inputDatasetType": {
+    "data_type": "dataset-geneExpression",
+    "file_types": [
+      "filetype-dataset-expression"
+    ]
+  },
   "name": "FUSE principal components tool",
   "organization": {
     "name": "RENCI",
     "url": "https://renci.org"
   },
-  "resultsType": {
-    "fileExtension": "csv",
-    "filetype": "results-PCATable",
+  "outputResultsType": {
+    "file_extension": "csv",
+    "file_type": "results-PCATable",
     "mime_type": "application/json"
   },
   "title": "fuse-tool-pca",
