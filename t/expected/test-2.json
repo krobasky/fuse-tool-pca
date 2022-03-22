@@ -19,7 +19,7 @@
   },
   "outputResultsType": {
     "file_extension": "csv",
-    "file_type": "results_PCATable",
+    "file_type": "filetype_results_PCATable",
     "mime_type": "application/json"
   },
   "title": "fuse-tool-pca",
