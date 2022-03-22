@@ -72,10 +72,6 @@ import requests
 # for example, an array of parameter names can be retrieved with:
 # curl -X 'GET'    'http://localhost:8083/openapi.json' -H 'accept: application/json' 2> /dev/null |python -m json.tool |jq '.paths."/submit".post.parameters[].name' 
 
-@app.get("/result_types", description="Submit an analysis")
-async def results_types():
-    return({"result_types": "result-type-pcaTable"})
-
 from datetime import datetime
 import requests
 @app.post("/submit", description="Submit an analysis")
