@@ -12,6 +12,7 @@
     "url": "https://renci.org"
   },
   "resultsType": {
+    "fileExtension": "csv",
     "filetype": "results-PCATable",
     "mime_type": "application/json"
   },
