@@ -19,6 +19,7 @@
     "file_types": ["filetype_dataset_expression"]
   },
   "outputResultsType": {
+      "data_type":"class_result_PCATable",
       "file_type":"filetype_results_PCATable",
       "mime_type": "application/json",
       "file_extension": "csv"
