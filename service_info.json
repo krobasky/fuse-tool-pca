@@ -22,6 +22,6 @@
       "data_type":"class_results_PCATable",
       "file_type":"filetype_results_PCATable",
       "mime_type": "application/json",
-      "file_extension": "csv"
+      "file_extension": "json"
   }
 }
