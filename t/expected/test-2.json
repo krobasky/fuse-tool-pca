@@ -19,7 +19,7 @@
   },
   "outputResultsType": {
     "data_type": "class_results_PCATable",
-    "file_extension": "csv",
+    "file_extension": "json",
     "file_type": "filetype_results_PCATable",
     "mime_type": "application/json"
   },
