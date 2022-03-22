@@ -18,7 +18,7 @@ use warnings;
 
 use Getopt::Long qw(GetOptions);
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 use Test::File::Contents;
 
 use lib './t';
@@ -50,4 +50,8 @@ cleanup_out();
 $fn = "test-1.json";
 generalize_output($fn, cmd("POST", rawf($fn), "submit?submitter_id=${SUBMITTER_ID}&number_of_components=2", "-F 'gene_expression=@./t/input/expression.csv;type=application/vnd.ms-excel' -H 'Content-Type: multipart/form-data' -H 'accept: application/json'"), ["start_time", "end_time", "contents"]);
 files_eq(f($fn), "t/out/${fn}",                                                    "Get PCA table");
+
+$fn = "test-2.json";
+generalize_output($fn, cmd("GET", rawf($fn), "service-info"), ["createdAt", "updatedAt"]);
+files_eq(f($fn), "t/out/${fn}",                                                    "($fn) Get config for this service");
 

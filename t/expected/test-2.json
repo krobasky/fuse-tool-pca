@@ -1,0 +1,21 @@
+{
+  "_comment": "-------End of GA4GH requirements----- (ignore this line)",
+  "contactUrl": "mailto:krobasky@gmail.com",
+  "createdAt": "xxx",
+  "description": "Serves data according to DRS specification; includes submit and search endpoints",
+  "documentationUrl": "https://github.com/RENCI/fuse-tool-pca",
+  "environment": "test",
+  "id": "fuse-tool-pca",
+  "name": "FUSE principal components tool",
+  "organization": {
+    "name": "RENCI",
+    "url": "https://renci.org"
+  },
+  "resultsType": {
+    "filetype": "results-PCATable",
+    "mime_type": "application/json"
+  },
+  "title": "fuse-tool-pca",
+  "updatedAt": "xxx",
+  "version": "1.0.0"
+}
