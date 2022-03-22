@@ -48,7 +48,7 @@ my $fn ;
 cleanup_out();
 
 $fn = "test-1.json";
-generalize_output($fn, cmd("POST", rawf($fn), "submit?submitter_id=${SUBMITTER_ID}&number_of_components=2", "-F 'gene_expression=@./t/input/expression.csv;type=application/vnd.ms-excel' -H 'Content-Type: multipart/form-data' -H 'accept: application/json'"), ["start_time", "end_time", "contents"]);
+generalize_output($fn, cmd("POST", rawf($fn), "submit?submitter_id=${SUBMITTER_ID}&number_of_components=2", "-F 'expression_file=@./t/input/expression.csv;type=application/vnd.ms-excel' -H 'Content-Type: multipart/form-data' -H 'accept: application/json'"), ["start_time", "end_time", "contents"]);
 files_eq(f($fn), "t/out/${fn}",                                                    "Get PCA table");
 
 $fn = "test-2.json";

@@ -15,11 +15,11 @@
   "_comment": "-------End of GA4GH requirements----- (ignore this line)",
   "title": "fuse-tool-pca",
   "inputDatasetType": {
-    "data_type": "class-dataset-expression",
-    "file_types": ["filetype-dataset-expression"]
+    "data_type": "class_dataset_expression",
+    "file_types": ["filetype_dataset_expression"]
   },
   "outputResultsType": {
-      "file_type":"results-PCATable",
+      "file_type":"results_PCATable",
       "mime_type": "application/json",
       "file_extension": "csv"
   }

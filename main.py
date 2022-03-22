@@ -82,25 +82,25 @@ import requests
 async def analyze(submitter_id: str = Query(default=..., description="unique identifier for the submitter (e.g., email)"),
                   number_of_components: int = Query(default=None, description="Number of principle components to return."),
                   expression_url: AnyHttpUrl = Query(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both"),
-                  expression: UploadFile = File(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both")):
+                  expression_file: UploadFile = File(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both")):
     '''
     Gene expression data are formatted with gene id's on rows, and samples on columns. Gene expression counts/intensities will not be normalized as part of the analysis. No header row, comma-delimited.
     '''
     function_name="[analyze]"
     try:
         # xxx figure out how to assert this in the pydantic validation instead
-        assert (gene_expression_url is None or gene_expression is None) and (gene_expression_url is not None or gene_expression is not None)
+        assert (expression_url is None or expression_file is None) and (expression_url is not None or expression_file is not None)
         start_time=datetime.now()
         logger.info(msg=f"[submit] started: {start_time}")
         # do some analysis
-        if gene_expression is not None:
+        if expression_file is not None:
             logger.info("{function_name} getting file")
-            gene_expression_string = await gene_expression.read()
+            gene_expression_string = await expression_file.read()
             gene_expression_stream = io.StringIO(str(gene_expression_string,'utf-8'))
         else:
             # xxx this is problematic; can't seem to get url off loclahost when this app is running in container on same network.
-            logger.info("{function_name} getting url: {gene_expression_url}")
-            r = requests.get(gene_expression_url)
+            logger.info("{function_name} getting url: {expression_url}")
+            r = requests.get(expression_url)
             logger.info("{function_name} getting expression_stream")
             gene_expression_stream = io.StringIO(str(r.content, 'utf-8'))
         import pandas as pd
@@ -140,8 +140,6 @@ async def analyze(submitter_id: str = Query(default=..., description="unique ide
         ]
 
         logger.info(msg=f"{function_name} returning: {return_object}")
-        #return return_object.dict()
-        # xxx
         return return_object
     except Exception as e:
         raise HTTPException(status_code=404,
