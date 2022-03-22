@@ -7,9 +7,9 @@
   "environment": "test",
   "id": "fuse-tool-pca",
   "inputDatasetType": {
-    "data_type": "class-dataset-expression",
+    "data_type": "class_dataset_expression",
     "file_types": [
-      "filetype-dataset-expression"
+      "filetype_dataset_expression"
     ]
   },
   "name": "FUSE principal components tool",
@@ -19,7 +19,7 @@
   },
   "outputResultsType": {
     "file_extension": "csv",
-    "file_type": "results-PCATable",
+    "file_type": "results_PCATable",
     "mime_type": "application/json"
   },
   "title": "fuse-tool-pca",
