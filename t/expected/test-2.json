@@ -7,7 +7,7 @@
   "environment": "test",
   "id": "fuse-tool-pca",
   "inputDatasetType": {
-    "data_type": "dataset-geneExpression",
+    "data_type": "class-dataset-expression",
     "file_types": [
       "filetype-dataset-expression"
     ]

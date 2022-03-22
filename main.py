@@ -81,8 +81,8 @@ import requests
 @app.post("/submit", description="Submit an analysis")
 async def analyze(submitter_id: str = Query(default=..., description="unique identifier for the submitter (e.g., email)"),
                   number_of_components: int = Query(default=None, description="Number of principle components to return."),
-                  gene_expression_url: AnyHttpUrl = Query(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both"),
-                  gene_expression: UploadFile = File(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both")):
+                  expression_url: AnyHttpUrl = Query(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both"),
+                  expression: UploadFile = File(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both")):
     '''
     Gene expression data are formatted with gene id's on rows, and samples on columns. Gene expression counts/intensities will not be normalized as part of the analysis. No header row, comma-delimited.
     '''
