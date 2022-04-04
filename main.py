@@ -108,7 +108,7 @@ async def analyze(submitter_id: str = Query(default=..., description="unique ide
         from sklearn.decomposition import PCA
         df_pca = PCA(n_components=number_of_components)
         logger.info(msg=f"{function_name} set up PCA.")
-        df_principalComponents = df_pca.fit_transform(gene_expression_df)
+        df_principalComponents = df_pca.fit_transform(gene_expression_df.T)
         logger.info(msg=f"{function_name} fit the transform.")
         pc_cols=[]
         for col in range(0,number_of_components):
