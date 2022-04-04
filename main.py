@@ -4,7 +4,6 @@ import inspect
 import os
 
 from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException, Query
-from fastapi.logger import logger
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, AnyHttpUrl
 from typing import Type, Optional, List
@@ -17,9 +16,11 @@ import traceback
 from fuse.models.Objects import AnalysisResults
 
 from fastapi.logger import logger
+
 from logging.config import dictConfig
 import logging
 from fuse.models.Config import LogConfig
+
 dictConfig(LogConfig().dict())
 logger = logging.getLogger("fuse-tool-pca")
 
@@ -90,17 +91,18 @@ async def analyze(submitter_id: str = Query(default=..., description="unique ide
         logger.info(msg=f"[submit] started: {start_time}")
         # do some analysis
         if expression_file is not None:
-            logger.info("{function_name} getting file")
+            logger.info(f'{function_name} getting file')
             gene_expression_string = await expression_file.read()
             gene_expression_stream = io.StringIO(str(gene_expression_string,'utf-8'))
         else:
             # xxx this is problematic; can't seem to get url off loclahost when this app is running in container on same network.
-            logger.info("{function_name} getting url: {expression_url}")
+            logger.info(f"{function_name} getting url: {expression_url}")
             r = requests.get(expression_url)
-            logger.info("{function_name} getting expression_stream")
+            logger.info(f"{function_name} getting expression_stream")
             gene_expression_stream = io.StringIO(str(r.content, 'utf-8'))
         import pandas as pd
         import numpy as np
+        logger.info(f"{function_name} reading expression streem")
         gene_expression_df = pd.read_csv(gene_expression_stream, sep=",", dtype=np.float64)
         logger.info(msg=f"{function_name} read input file.")
         from sklearn.decomposition import PCA
@@ -138,8 +140,10 @@ async def analyze(submitter_id: str = Query(default=..., description="unique ide
         logger.info(msg=f"{function_name} returning: {return_object}")
         return return_object
     except Exception as e:
+        detail_str=f"{function_name} ! Exception {type(e)} occurred while running submit, message=[{e}] ! traceback={traceback.format_exc()}"
+        logger.error(msg=detail_str)
         raise HTTPException(status_code=404,
-                            detail=f"{function_name} ! Exception {type(e)} occurred while running submit, message=[{e}] ! traceback={traceback.format_exc()}")
+                            detail=detail_str)
 
 @app.get("/service-info", summary="Retrieve information about this service")
 async def service_info():
