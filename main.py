@@ -82,6 +82,7 @@ async def analyze(submitter_id: str = Query(default=..., description="unique ide
                   expression_file: UploadFile = File(default=None, description="either submit an url to the object to be analyzed or upload a file, but not both")):
     '''
     Gene expression data are formatted with gene id's on rows, and samples on columns. Gene expression counts/intensities will not be normalized as part of the analysis. No header row, comma-delimited.
+    There should be no header on the data file, or it will be treated as a row of gene expression intensitites
     '''
     function_name="[analyze]"
     try:
@@ -103,11 +104,18 @@ async def analyze(submitter_id: str = Query(default=..., description="unique ide
         import pandas as pd
         import numpy as np
         logger.info(f"{function_name} reading expression streem")
-        gene_expression_df = pd.read_csv(gene_expression_stream, sep=",", dtype=np.float64)
+        gene_expression_df = pd.read_csv(gene_expression_stream, sep=",", dtype=np.float64, header=None)
         logger.info(msg=f"{function_name} read input file.")
         from sklearn.decomposition import PCA
         df_pca = PCA(n_components=number_of_components)
         logger.info(msg=f"{function_name} set up PCA.")
+        
+        # first column is gene id;
+        # remove any rows where gene id = 0
+        gene_expression_df=gene_expression_df[gene_expression_df.loc[:,0] != 0]
+        # remove gene id column
+        gene_expression_df= gene_expression_df.loc[:,1:]
+        
         df_principalComponents = df_pca.fit_transform(gene_expression_df.T)
         logger.info(msg=f"{function_name} fit the transform.")
         pc_cols=[]
