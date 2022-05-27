@@ -104,8 +104,11 @@ async def analyze(submitter_id: str = Query(default=..., description="unique ide
         import pandas as pd
         import numpy as np
         logger.info(f"{function_name} reading expression streem")
-        gene_expression_df = pd.read_csv(gene_expression_stream, sep=",", dtype=np.float64, header=None)
+
+        
+        gene_expression_df = pd.read_csv(gene_expression_stream, sep=",", dtype=np.float64, header=None, skiprows=1)
         logger.info(msg=f"{function_name} read input file.")
+        
         from sklearn.decomposition import PCA
         df_pca = PCA(n_components=number_of_components)
         logger.info(msg=f"{function_name} set up PCA.")
